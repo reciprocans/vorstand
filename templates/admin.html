@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="admin-head">
+  <div><a href="{{ url_for('index') }}">← Zurück</a><h1>Admin-Bereich</h1></div>
+  <a class="btn" href="{{ url_for('backup') }}">Backup herunterladen</a>
+</div>
+
+<section class="card admin-section">
+  <h2>Passwörter</h2>
+  <p class="muted">Die drei Konten sind fest angelegt. Hier kannst du ihre Passwörter ändern.</p>
+  <div class="password-grid">
+    {% for user in users %}
+    <form method="post" action="{{ url_for('change_password', username=user.username) }}" class="password-card">
+      <div><strong>{{ role_labels.get(user.role, user.role) }}</strong><div class="muted">Benutzername: {{ user.username }}</div></div>
+      <input type="password" name="new_password" placeholder="Neues Passwort" minlength="8" required>
+      <input type="password" name="confirm_password" placeholder="Passwort wiederholen" minlength="8" required>
+      <button type="submit">Passwort ändern</button>
+    </form>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="admin-section">
+  <div class="section-head"><div><h2>Archiv</h2><p class="muted">Archivierte Dokumente verschwinden aus der normalen Jahresansicht, bleiben aber vollständig erhalten.</p></div></div>
+  {% if archived_docs %}
+  <div class="doc-list">
+    {% for doc in archived_docs %}
+    <article class="doc card">
+      <div class="doc-main">
+        <div class="doc-tags"><span class="badge">{{ doc.category }}</span><span class="date-badge">{{ doc.document_date[8:10] }}.{{ doc.document_date[5:7] }}.{{ doc.document_date[:4] }}</span></div>
+        <a class="doc-title" href="{{ url_for('view_document', doc_id=doc.id) }}">{{ doc.title }}</a>
+        {% if doc.comment %}<div class="comment">{{ doc.comment }}</div>{% endif %}
+      </div>
+      <div class="actions">
+        <a class="btn secondary" href="{{ url_for('view_document', doc_id=doc.id) }}">Ansehen</a>
+        <form method="post" action="{{ url_for('restore_document', doc_id=doc.id) }}"><button type="submit">Wiederherstellen</button></form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<div class="empty card">Das Archiv ist leer.</div>{% endif %}
+</section>
+{% endblock %}
